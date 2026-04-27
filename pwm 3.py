@@ -1,11 +1,3 @@
-"""
-motif_hmm_v2.py — Biological Gatekeeper v2
-Upgrades over v1:
-  1. Dynamic PWM Threshold Gate  (pwm_threshold = -3.0)
-  2. Minimum CDS Length Filter   (min_cds_len_bp = 135)
-  3. Runs full Chr I → Chr IV benchmark comparing Baseline, v1, and v2
-"""
-
 import json
 import numpy as np
 import pandas as pd
