@@ -202,7 +202,16 @@ def decoder_v2(seq_str, tokens,
         path[i] = 2
     return path
 
-
+# fetch test datas
+def fetchTestFastafromjson():
+    with Entrez.efetch(db="nucleotide", 
+                   id="NC_000001.11", 
+                   seq_start=3.01*1000000, 
+                   seq_stop=5*1000000, 
+                   rettype="gbwithparts", 
+                   retmode="text") as h:
+        rec_test = SeqIO.read(h, "genbank")
+    return rec_test
 # ─────────────────────────────────────────────
 # 3.  LOAD CHROMOSOME IV TEST DATA
 # ─────────────────────────────────────────────
@@ -234,9 +243,9 @@ def main():
         print(f"Model saved to {args.model_file}.")
 
     print("2. Fetching Test Data...")
-    with Entrez.efetch(db="nucleotide", id="NT_011109.10",
-                       rettype="gbwithparts", retmode="text") as h:
-        rec_test = SeqIO.read(h, "genbank")
+    # with Entrez.efetch(db="nucleotide", id="NT_011109.10",
+    #                    rettype="gbwithparts", retmode="text") as h:
+    #     rec_test = SeqIO.read(h, "genbank")
     # To fetch the first 1 million base pairs only
     # with Entrez.efetch(db="nucleotide", 
     #                id="NC_000001.11", 
@@ -245,6 +254,8 @@ def main():
     #                rettype="gbwithparts", 
     #                retmode="text") as h:
     #     rec_test = SeqIO.read(h, "genbank")
+    
+    rec_test = fetchTestFastafromjson()
 
     test_cds_wins, intergenics = [], []
     last_end = 0
