@@ -33,6 +33,17 @@ def encode(seq_str):
     return [codon_vocab.get(seq_str[i:i+3], codon_vocab["UNK"])
             for i in range(0, len(seq_str)-2, 3)]
 
+def load_training_sources(filepath="training_sources.json"):
+    try:
+        with open(filepath, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: {filepath} not found.")
+        return []
+    except json.JSONDecodeError:
+        print(f"Error: Failed to decode JSON from {filepath}.")
+        return []
+    
 def train_model():
     # ─────────────────────────────────────────────
     # 1.  TRAIN PAN-EUKARYOTIC MODEL
@@ -40,13 +51,7 @@ def train_model():
     print("1. Fetching Pan-Eukaryotic Training Data...")
 
     # We define slices for larger genomes to prevent 400 Bad Request errors
-    training_sources = [
-        {"name": "Yeast (Fungi)", "id": "NC_001133.9", "start": None, "stop": None},
-        {"name": "D. melanogaster (Fly)", "id": "NC_004353.4", "start": None, "stop": None},
-        {"name": "Arabidopsis (Plant)", "id": "NC_003075.7", "start": 1000000, "stop": 3000000},
-        {"name": "Human (Mammal)", "id": "NC_000001.11", "start": 1000000, "stop": 3000000},
-        # {"name": "Human (Mammal)", "id": "NC_000021.9", "start": 25000000, "stop": 25500000}
-    ]
+    training_sources = load_training_sources()
 
     train_cds = []
     pwm_counts = np.ones((4, 50)) * 1e-4  # Initialize with pseudo-counts to prevent log(0)

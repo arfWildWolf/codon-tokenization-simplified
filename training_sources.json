@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Yeast (Fungi)",
+    "id": "NC_001133.9",
+    "start": null,
+    "stop": null
+  },
+  {
+    "name": "D. melanogaster (Fly)",
+    "id": "NC_004353.4",
+    "start": null,
+    "stop": null
+  },
+  {
+    "name": "Arabidopsis (Plant)",
+    "id": "NC_003075.7",
+    "start": 1000000,
+    "stop": 3000000
+  },
+  {
+    "name": "Human (Mammal)",
+    "id": "NC_000001.11",
+    "start": 1000000,
+    "stop": 3000000
+  }
+]
