@@ -4,8 +4,10 @@ import pandas as pd
 from Bio import SeqIO, Entrez
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score,
-    f1_score, matthews_corrcoef, mean_absolute_error
+    f1_score, matthews_corrcoef, mean_absolute_error,
+    confusion_matrix, roc_auc_score, roc_curve, auc, balanced_accuracy_score
 )
+import seaborn as sns
 import warnings
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -104,6 +106,7 @@ def train_model():
     pwm       = pwm_counts / pwm_counts.sum(axis=0, keepdims=True)
     bg        = np.array([0.25]*4).reshape(4,1)
     pwm_logo_val  = np.log2(pwm / bg)
+    # pwm_logo_val  = pwm / bg
 
     # ─────────────────────────────────────────────
     # 1.5 BUILD EMISSION MODEL (For Future Use)
@@ -203,13 +206,15 @@ def decoder_v2(seq_str, tokens,
     return path
 
 # fetch test datas
-def fetchTestFastafromjson():
-    with Entrez.efetch(db="nucleotide", 
-                   id="NC_000001.11", 
-                   seq_start=3.01*1000000, 
-                   seq_stop=5*1000000, 
-                   rettype="gbwithparts", 
-                   retmode="text") as h:
+def fetchTestFastafromjson(type = "nucleotide", ID="NC_000001.11", 
+                           start = 2.01*1000000, stop = 3*1000000, 
+                           retype = "gbwithparts", rettmode = "text"):
+    with Entrez.efetch(db=type, 
+                   id=ID, 
+                   seq_start=start, 
+                   seq_stop=stop, 
+                   rettype=retype, 
+                   retmode=rettmode) as h:
         rec_test = SeqIO.read(h, "genbank")
     return rec_test
 # ─────────────────────────────────────────────
@@ -255,7 +260,7 @@ def main():
     #                retmode="text") as h:
     #     rec_test = SeqIO.read(h, "genbank")
     
-    rec_test = fetchTestFastafromjson()
+    rec_test = fetchTestFastafromjson(ID= "NC_001136.10", start= None, stop = None)
 
     test_cds_wins, intergenics = [], []
     last_end = 0
@@ -294,6 +299,7 @@ def main():
 
     def evaluate(decoder_fn, label):
         all_t, all_p = [], []
+        all_scores = [] 
         true_starts, pred_starts = [], []
         exact_hits = 0
         total_cds = 0
@@ -301,12 +307,27 @@ def main():
         for seq, lbls in test_data:
             toks  = encode(seq)
             preds = decoder_fn(seq, toks)
-
+            
+            # --- THE FIX ---
+            # Align the continuous score with the model's actual decision
+            if 1 in preds:
+                # Model predicted a CDS. Get the PWM score of the chosen start codon.
+                p_s = preds.index(1)
+                final_score = score_promoter(seq[p_s*3-50 : p_s*3])
+            else:
+                # Model rejected the window (failed PWM threshold or Length Gate).
+                # Assign a baseline failing score so the ROC curve reflects the rejection.
+                final_score = -20.0 
+            # ---------------
+            
             bin_t = [1 if x > 0 else 0 for x in lbls]
             bin_p = [1 if x > 0 else 0 for x in preds]
-            all_t.extend(bin_t)
-            all_p.extend(bin_p)
+            
+            all_t.append(1 if sum(bin_t) > 0 else 0)
+            all_p.append(1 if sum(bin_p) > 0 else 0)
+            all_scores.append(final_score)
 
+            # Distance and exact match metrics
             if 1 in lbls:
                 total_cds += 1
                 t_s = lbls.index(1)
@@ -319,22 +340,32 @@ def main():
                 else:
                     pred_starts.append(len(seq))
 
+        # Core Metrics
         acc  = accuracy_score(all_t, all_p)
         prec = precision_score(all_t, all_p, zero_division=0)
         rec  = recall_score(all_t, all_p, zero_division=0)
         f1   = f1_score(all_t, all_p, zero_division=0)
         mcc  = matthews_corrcoef(all_t, all_p)
-        mae  = mean_absolute_error(true_starts, pred_starts)
+        mae  = mean_absolute_error(true_starts, pred_starts) if true_starts else 0
         exact_rate = exact_hits / total_cds if total_cds else 0
+
+        # Added Advanced Metrics
+        tn, fp, fn, tp = confusion_matrix(all_t, all_p, labels=[0, 1]).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+        bal_acc = balanced_accuracy_score(all_t, all_p)
 
         print(f"\n  [{label}]")
         print(f"    Accuracy:  {acc:.4f}   Precision: {prec:.4f}")
         print(f"    Recall:    {rec:.4f}   F1-Score:  {f1:.4f}")
         print(f"    MCC:       {mcc:.4f}   MAE:       {mae:.2f} bp")
+        print(f"    Spec:      {specificity:.4f}   Bal Acc:   {bal_acc:.4f}")
         print(f"    Exact Start Match: {exact_rate*100:.2f}%")
 
+        # Retained strict dict formatting + appended raw arrays for visualization
         return dict(label=label, accuracy=acc, precision=prec, recall=rec,
-                    f1=f1, mcc=mcc, mae=mae, exact_rate=exact_rate)
+                    f1=f1, mcc=mcc, mae=mae, exact_rate=exact_rate,
+                    specificity=specificity, balanced_accuracy=bal_acc,
+                    y_true=all_t, y_pred=all_p, y_scores=all_scores)
 
     results_v1 = evaluate(decoder_v1, "v1 (PWM only)")
     results_v2 = evaluate(decoder_v2, "v2 (PWM + Length Gate)")
@@ -352,12 +383,15 @@ def main():
         mcc        = 0.2019,
         mae        = 147.43,
         exact_rate = 0.0,
+        specificity = None,
+        balanced_accuracy = None,
+        y_true=None, y_pred=None, y_scores=None
     )
 
     rows = [baseline, results_v1, results_v2]
-    col_order = ["label", "mcc", "precision", "recall", "f1", "mae", "exact_rate"]
+    col_order = ["label", "mcc", "precision", "recall", "specificity", "f1", "mae", "exact_rate"]
     df = pd.DataFrame(rows)[col_order]
-    df.columns = ["Model", "MCC", "Precision", "Recall", "F1", "MAE (bp)", "Exact Start %"]
+    df.columns = ["Model", "MCC", "Precision", "Recall", "Specificity", "F1", "MAE (bp)", "Exact Start %"]
     df["Exact Start %"] = df["Exact Start %"] * 100
 
     print("\n\n=== FINAL COMPARISON TABLE ===")
@@ -439,6 +473,38 @@ def main():
     plt.savefig("v2_comparison_dashboard.png", dpi=300, bbox_inches='tight')
     print("Dashboard saved: v2_comparison_dashboard.png")
     print("\nAll done. Check v2_comparison_table.csv for the full table.")
+    
+    # ─────────────────────────────────────────────
+    # 7.  NEW PERFORMANCE DIAGNOSTICS (Confusion Matrix & ROC)
+    # ─────────────────────────────────────────────
+    print("\n5. Generating Confusion Matrix & ROC Curve...")
+    diag_fig, (ax_cm, ax_roc) = plt.subplots(1, 2, figsize=(14, 6))
+
+    # A. Confusion Matrix for v2
+    cm = confusion_matrix(results_v1["y_true"], results_v1["y_pred"])
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax_cm,
+                xticklabels=['Intergenic', 'CDS'], yticklabels=['Intergenic', 'CDS'])
+    ax_cm.set_title(f"Confusion Matrix: {results_v2['label']}")
+    ax_cm.set_xlabel("Predicted")
+    ax_cm.set_ylabel("True")
+
+    # B. ROC Curve
+    res = results_v1
+    fpr, tpr, _ = roc_curve(res["y_true"], res["y_scores"])
+    roc_auc = auc(fpr, tpr)
+    ax_roc.plot(fpr, tpr, lw=2, label=f'{res["label"]} (AUC = {roc_auc:.3f})')
+
+    ax_roc.plot([0, 1], [0, 1], color='gray', linestyle='--')
+    ax_roc.set_xlim([0.0, 1.0])
+    ax_roc.set_ylim([0.0, 1.05])
+    ax_roc.set_xlabel('False Positive Rate')
+    ax_roc.set_ylabel('True Positive Rate')
+    ax_roc.set_title('Receiver Operating Characteristic (ROC)')
+    ax_roc.legend(loc="lower right")
+
+    plt.tight_layout()
+    diag_fig.savefig("performance_diagnostics.png", dpi=300)
+    print("Diagnostics saved: performance_diagnostics.png")
 
 
 if __name__ == '__main__':
