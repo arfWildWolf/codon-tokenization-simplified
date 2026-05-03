@@ -47,70 +47,102 @@ def load_training_sources(filepath="training_sources.json"):
         return []
     
 def train_model():
-    # ─────────────────────────────────────────────
-    # 1.  TRAIN PAN-EUKARYOTIC MODEL
-    # ─────────────────────────────────────────────
     print("1. Fetching Pan-Eukaryotic Training Data...")
-
-    # We define slices for larger genomes to prevent 400 Bad Request errors
     training_sources = load_training_sources()
-
     train_cds = []
-    pwm_counts = np.ones((4, 50)) * 1e-4  # Initialize with pseudo-counts to prevent log(0)
+    pwm_counts = np.ones((4, 50)) * 1e-4
+    seen_tis = set() # Track unique absolute coordinates
+    
+    # NEW: We will log the metadata of every window we gather
+    metadata_log = []
 
     for source in training_sources:
         print(f"   -> Pulling {source['name']}...")
         try:
-            # Handle sub-range fetches for massive genomes
-            if source["start"] and source["stop"]:
-                handle = Entrez.efetch(db="nucleotide", id=source["id"], 
-                                       seq_start=source["start"], seq_stop=source["stop"], 
-                                       rettype="gbwithparts", retmode="text")
+            fetch_params = {"db": "nucleotide", "id": source["id"], "rettype": "gbwithparts", "retmode": "text"}
+            if source.get("start") and source.get("stop"):
+                fetch_params["seq_start"] = source["start"]
+                fetch_params["seq_stop"] = source["stop"]
                 offset = source["start"]
             else:
-                handle = Entrez.efetch(db="nucleotide", id=source["id"], 
-                                       rettype="gbwithparts", retmode="text")
                 offset = 0
-                
-            rec_train = SeqIO.read(handle, "genbank")
-            handle.close()
+            
+            with Entrez.efetch(**fetch_params) as handle:
+                rec_train = SeqIO.read(handle, "genbank")
             
             source_count = 0
             for f in rec_train.features:
-                if f.type == "CDS" and f.location.strand == 1:
-                    # Normalize coordinates based on the fetch offset
-                    s = int(f.location.start) - offset
-                    ws, we = s - 150, s + 150
+                if f.type == "CDS":
+                    strand = f.location.strand
+                    tis_abs = int(f.location.start) if strand == 1 else int(f.location.end) - 1
+                
+                    # UNIQUE CHECK: Skip if we've already learned this exact start site
+                    if (source["id"], tis_abs) in seen_tis:
+                        continue
+                    seen_tis.add((source["id"], tis_abs))
                     
-                    # Boundary check
-                    if ws >= 0 and we <= len(rec_train.seq):
-                        seq_str = str(rec_train.seq[ws:we]).upper()
+                    # # BIOLOGICAL FIX: Identify the absolute genomic Translation Initiation Site (TIS)
+                    # if strand == 1:
+                    #     tis_abs = int(f.location.start)
+                    # else:
+                    #     tis_abs = int(f.location.end) - 1
                         
-                        # Length check only. Stop filtering out 'N' gaps entirely.
-                        if len(seq_str) == 300:
-                            train_cds.append((seq_str, [0]*50 + [1] + [2]*48 + [3]))
-                            source_count += 1
+                    # Calculate relative TIS for slicing the downloaded sequence chunk
+                    tis_rel = tis_abs - (offset - 1 if offset > 0 else 0)
+
+                    # Center 300bp window
+                    ws, we = tis_rel - 150, tis_rel + 150
+                    
+                    if ws >= 0 and we <= len(rec_train.seq):
+                        chunk = rec_train.seq[ws:we]
+                        
+                        # Flip negative strand to match PWM orientation
+                        if strand == -1:
+                            chunk = chunk.reverse_complement()
+                        
+                        seq_str = str(chunk).upper()
+                        
+                        # STRICT VERIFICATION: Ensure the ATG is exactly at the center
+                        if len(seq_str) == 300 and seq_str[150:153] == "ATG":
                             
-                            # Accumulate PWM counts (upstream 50bp)
+                            # ─────────────────────────────────────────────
+                            # SAVE COORDINATE METADATA
+                            # ─────────────────────────────────────────────
+                            meta = {
+                                "species": source["name"],
+                                "accession": source["id"],
+                                "tis_absolute": tis_abs,
+                                "strand": strand
+                            }
+                            
+                            # Append the sequence, the labels, AND the metadata
+                            train_cds.append((seq_str, [0]*50 + [1] + [2]*48 + [3], meta))
+                            metadata_log.append(meta)
+                            
+                            source_count += 1
+                            # Accumulate PWM (50bp upstream: indices 100 to 150)
                             for i, nuc in enumerate(seq_str[100:150]):
                                 if nuc in nuc2idx:
                                     pwm_counts[nuc2idx[nuc], i] += 1
                                     
             print(f"      Gathered {source_count} CDS windows.")
         except Exception as e:
-            print(f"      [!] Failed to fetch {source['name']}: {e}")
+            print(f"      [!] Failed {source['name']}: {e}")
 
     print(f"   Total Training Sequences: {len(train_cds)}")
+    
+    # Export the coordinate log so you are never lost
+    with open("training_metadata_log.json", "w") as mf:
+        json.dump(metadata_log, mf, indent=2)
+    print("   -> Saved training_metadata_log.json")
 
-    # Finalize the Position Weight Matrix
+    # ─────────────────────────────────────────────
+    # BUILD PWM & EMISSIONS
+    # ─────────────────────────────────────────────
     pwm       = pwm_counts / pwm_counts.sum(axis=0, keepdims=True)
     bg        = np.array([0.25]*4).reshape(4,1)
     pwm_logo_val  = np.log2(pwm / bg)
-    # pwm_logo_val  = pwm / bg
 
-    # ─────────────────────────────────────────────
-    # 1.5 BUILD EMISSION MODEL (For Future Use)
-    # ─────────────────────────────────────────────
     codon_vocab_val = {}
     idx = 0
     for a in "ACGT":
@@ -122,11 +154,14 @@ def train_model():
 
     vocab_size = 65
     emissions_val = np.ones((4, vocab_size)) * 1e-6
-    for seq, lbls in train_cds:
+    
+    # UPDATE: Unpack the new 3-element tuple (seq, lbls, meta)
+    for seq, lbls, meta in train_cds:
         toks = [codon_vocab_val.get(seq[i:i+3], codon_vocab_val["UNK"])
                 for i in range(0, len(seq)-2, 3)]
         for t, state in zip(toks, lbls):
             emissions_val[state, t] += 1
+            
     for i in range(4):
         emissions_val[i] /= emissions_val[i].sum()
     log_emissions_val = np.log(emissions_val)
@@ -163,8 +198,8 @@ def decoder_v1(seq_str, tokens):
 
 
 def decoder_v2(seq_str, tokens,
-               pwm_threshold: float = -3.0,
-               min_cds_len_bp: int  = 135):
+               pwm_threshold: float = -5.0,
+               min_cds_len_bp: int  = 90):
     """
     v2: Biological Gatekeeper with two hard filters.
 
@@ -605,7 +640,7 @@ def main():
         print(f"Model saved to {args.model_file}.")
 
     # Trigger the testing from JSON loop
-    testingFromjson(args.test_json)0
+    testingFromjson(args.test_json)
 
 if __name__ == '__main__':
     main()

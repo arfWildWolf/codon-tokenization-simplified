@@ -1,0 +1,656 @@
+[
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 2479,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 12045,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 21565,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 31566,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 33447,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 35154,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 36508,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 37463,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 39258,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 42176,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 45898,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 48563,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 57517,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 61315,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 62839,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 71785,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 74019,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 76426,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 79717,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 82705,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 87285,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 92899,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 94686,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 114918,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 120224,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 124878,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 129269,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 130798,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 132198,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 135853,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 136913,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 142173,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 143706,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 152256,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 155004,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 158965,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 169374,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 183769,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 184891,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 186320,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 186835,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 188106,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 190192,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 192618,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 203402,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 220197,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 221048,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 222405,
+    "strand": 1
+  },
+  {
+    "species": "Yeast (Full Genome - Fungi)",
+    "accession": "NC_001133.9",
+    "tis_absolute": 225459,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 929,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 72429,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 91213,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 134528,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 134717,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 136752,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 136925,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 151750,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 210454,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 228004,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 231953,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 255516,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 308223,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 308577,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 316416,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 360690,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 446919,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 450308,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 467850,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 521503,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 560257,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 560279,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 573748,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 583825,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 611402,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 611427,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 629835,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 663700,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 680708,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 705164,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 707505,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 714043,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 725716,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 938429,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 990251,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 1031889,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 1065107,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 1092285,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 1098903,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 1124264,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 1126749,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 1147546,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 1186517,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 1199014,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 1219092,
+    "strand": 1
+  },
+  {
+    "species": "D. melanogaster (Fly)",
+    "accession": "NC_004353.4",
+    "tis_absolute": 1233169,
+    "strand": 1
+  },
+  {
+    "species": "Arabidopsis (Plant)",
+    "accession": "NC_003075.7",
+    "tis_absolute": 1351882,
+    "strand": -1
+  },
+  {
+    "species": "Arabidopsis (Plant)",
+    "accession": "NC_003075.7",
+    "tis_absolute": 1628685,
+    "strand": -1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 4199572,
+    "strand": -1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 4424955,
+    "strand": 1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 4448784,
+    "strand": 1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 7886637,
+    "strand": -1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 9273531,
+    "strand": 1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 10104443,
+    "strand": 1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 13215087,
+    "strand": 1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 14155931,
+    "strand": -1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 15222350,
+    "strand": 1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 17978772,
+    "strand": -1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 24890095,
+    "strand": -1
+  },
+  {
+    "species": "Human (Mammal)",
+    "accession": "NC_000001.11",
+    "tis_absolute": 24900441,
+    "strand": -1
+  }
+]
