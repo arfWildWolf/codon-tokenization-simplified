@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Human (Mammal)",
+    "id": "NC_000001.11",
+    "start": 1000000,
+    "stop": 2000000
+  },
+  {
+    "name": "Human (Mammal - Chr 17)",
+    "id": "NC_000017.11",
+    "start": 40000000,
+    "stop": 42000000
+  },
+  {
+    "name": "Mouse (Mammal - Chr 19)",
+    "id": "NC_000085.7",
+    "start": 10000000,
+    "stop": 12000000
+  },
+  {
+    "name": "Arabidopsis (Plant - Chr 1)",
+    "id": "NC_003070.9",
+    "start": 5000000,
+    "stop": 7000000
+  },
+  {
+    "name": "Yeast (Fungi - Chr IV)",
+    "id": "NC_001136.10",
+    "start": 400000,
+    "stop": 900000
+  },
+  {
+    "name": "Worm (Nematode - Chr I)",
+    "id": "NC_003279.8",
+    "start": 5000000,
+    "stop": 7000000
+  },
+  {
+    "name": "Fruit Fly (Insect - Chr 4)",
+    "id": "NC_004353.4",
+    "start": 100000,
+    "stop": 1100000
+  },
+  {
+    "name": "Zebrafish (Fish - Chr 10)",
+    "id": "NC_007121.7",
+    "start": 10000000,
+    "stop": 12000000
+  },
+  {
+    "name": "GUE Human Core Promoter (Chr 22)",
+    "id": "NC_000022.11",
+    "start": 20000000,
+    "stop": 22000000
+  },
+  {
+    "name": "GUE Human Splice Site (Chr 19)",
+    "id": "NC_000019.10",
+    "start": 30000000,
+    "stop": 32000000
+  },
+  {
+    "name": "GUE Mouse TF Binding (Chr 11)",
+    "id": "NC_000077.7",
+    "start": 50000000,
+    "stop": 52000000
+  },
+  {
+    "name": "GUE SARS-CoV-2 Variant (Full Genome)",
+    "id": "NC_045512.2",
+    "start": 1,
+    "stop": 29903
+  },
+  {
+    "name": "GUE Species Classification (E. coli K-12)",
+    "id": "NC_000913.3",
+    "start": 1,
+    "stop": 4641652
+  },
+  {
+    "name": "GUE Fruit Fly Regulatory (Chr 3L)",
+    "id": "NT_033779.5",
+    "start": 10000000,
+    "stop": 12000000
+  },
+  {
+    "name": "GUE C. elegans Histone (Chr II)",
+    "id": "NC_003280.10",
+    "start": 3000000,
+    "stop": 5000000
+  }
+]
