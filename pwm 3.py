@@ -478,18 +478,30 @@ def main():
     # 7.  NEW PERFORMANCE DIAGNOSTICS (Confusion Matrix & ROC)
     # ─────────────────────────────────────────────
     print("\n5. Generating Confusion Matrix & ROC Curve...")
-    diag_fig, (ax_cm, ax_roc) = plt.subplots(1, 2, figsize=(14, 6))
+    diag_fig, (ax_cm, axc_cm, ax_roc) = plt.subplots(1, 3, figsize=(14, 6))
 
     # A. Confusion Matrix for v2
     cm = confusion_matrix(results_v1["y_true"], results_v1["y_pred"])
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax_cm,
                 xticklabels=['Intergenic', 'CDS'], yticklabels=['Intergenic', 'CDS'])
-    ax_cm.set_title(f"Confusion Matrix: {results_v2['label']}")
+    ax_cm.set_title(f"Confusion Matrix: {results_v1['label']}")
     ax_cm.set_xlabel("Predicted")
     ax_cm.set_ylabel("True")
+    
+    cm = confusion_matrix(results_v2["y_true"], results_v2["y_pred"])
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=axc_cm,
+                xticklabels=['Intergenic', 'CDS'], yticklabels=['Intergenic', 'CDS'])
+    axc_cm.set_title(f"Confusion Matrix: {results_v2['label']}")
+    axc_cm.set_xlabel("Predicted")
+    axc_cm.set_ylabel("True")
 
     # B. ROC Curve
     res = results_v1
+    fpr, tpr, _ = roc_curve(res["y_true"], res["y_scores"])
+    roc_auc = auc(fpr, tpr)
+    ax_roc.plot(fpr, tpr, lw=2, label=f'{res["label"]} (AUC = {roc_auc:.3f})')
+    
+    res = results_v2
     fpr, tpr, _ = roc_curve(res["y_true"], res["y_scores"])
     roc_auc = auc(fpr, tpr)
     ax_roc.plot(fpr, tpr, lw=2, label=f'{res["label"]} (AUC = {roc_auc:.3f})')
