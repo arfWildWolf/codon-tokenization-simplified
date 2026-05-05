@@ -584,73 +584,31 @@
   {
     "species": "Human (Mammal)",
     "accession": "NC_000001.11",
-    "tis_absolute": 4199572,
-    "strand": -1
-  },
-  {
-    "species": "Human (Mammal)",
-    "accession": "NC_000001.11",
-    "tis_absolute": 4424955,
+    "tis_absolute": 11188871,
     "strand": 1
   },
   {
     "species": "Human (Mammal)",
     "accession": "NC_000001.11",
-    "tis_absolute": 4448784,
-    "strand": 1
-  },
-  {
-    "species": "Human (Mammal)",
-    "accession": "NC_000001.11",
-    "tis_absolute": 7886637,
+    "tis_absolute": 12199589,
     "strand": -1
   },
   {
     "species": "Human (Mammal)",
     "accession": "NC_000001.11",
-    "tis_absolute": 9273531,
+    "tis_absolute": 12416355,
     "strand": 1
   },
   {
     "species": "Human (Mammal)",
     "accession": "NC_000001.11",
-    "tis_absolute": 10104443,
+    "tis_absolute": 14305787,
     "strand": 1
   },
   {
     "species": "Human (Mammal)",
     "accession": "NC_000001.11",
-    "tis_absolute": 13215087,
+    "tis_absolute": 14617671,
     "strand": 1
-  },
-  {
-    "species": "Human (Mammal)",
-    "accession": "NC_000001.11",
-    "tis_absolute": 14155931,
-    "strand": -1
-  },
-  {
-    "species": "Human (Mammal)",
-    "accession": "NC_000001.11",
-    "tis_absolute": 15222350,
-    "strand": 1
-  },
-  {
-    "species": "Human (Mammal)",
-    "accession": "NC_000001.11",
-    "tis_absolute": 17978772,
-    "strand": -1
-  },
-  {
-    "species": "Human (Mammal)",
-    "accession": "NC_000001.11",
-    "tis_absolute": 24890095,
-    "strand": -1
-  },
-  {
-    "species": "Human (Mammal)",
-    "accession": "NC_000001.11",
-    "tis_absolute": 24900441,
-    "strand": -1
   }
 ]

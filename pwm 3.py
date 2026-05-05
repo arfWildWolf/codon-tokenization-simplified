@@ -198,8 +198,8 @@ def decoder_v1(seq_str, tokens):
 
 
 def decoder_v2(seq_str, tokens,
-               pwm_threshold: float = -5.0,
-               min_cds_len_bp: int  = 90):
+               pwm_threshold: float = -3.0,
+               min_cds_len_bp: int  = 135):
     """
     v2: Biological Gatekeeper with two hard filters.
 
