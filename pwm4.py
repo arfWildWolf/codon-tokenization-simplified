@@ -11,8 +11,8 @@ import os
 # Configuration matching the dataset generator
 UPSTREAM = 150
 DOWNSTREAM = 150
-PWM_WINDOW = 50     # Evaluate 50bp immediately preceding the start codon
-CODON_WINDOW = 90   # Evaluate 90bp (30 codons) downstream of the start codon
+PWM_WINDOW = 150     # Evaluate 50bp immediately preceding the start codon
+CODON_WINDOW = 150   # Evaluate 90bp (30 codons) downstream of the start codon
 
 nuc2idx = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
 
@@ -191,7 +191,7 @@ def evaluate(csv_path, model_data):
         # State 0 (False/Decoy) is represented by baseline 0.0
         # State 1 (True TIS) is represented by the log-odds total_score
         # prediction = np.argmax([0.0, total_score])
-        custom_threshold = 3.2863
+        custom_threshold = 6.8611
         prediction = 1 if total_score >= custom_threshold else 0
         y_pred.append(prediction)
         

@@ -237,17 +237,18 @@ def main():
         print(f"Model saved to {args.model_file}.")
 
     print("2. Fetching Test Data...")
-    # with Entrez.efetch(db="nucleotide", id="NT_011109.10",
-    #                    rettype="gbwithparts", retmode="text") as h:
-    #     rec_test = SeqIO.read(h, "genbank")
-    # To fetch the first 1 million base pairs only
-    with Entrez.efetch(db="nucleotide", 
-                   id="NC_000001.11", 
-                   seq_start=2.01*1000000, 
-                   seq_stop=3*1000000, 
-                   rettype="gbwithparts", 
-                   retmode="text") as h:
+    with Entrez.efetch(db="nucleotide", id="NC_001136.10",
+                       rettype="gbwithparts", retmode="text") as h:
         rec_test = SeqIO.read(h, "genbank")
+    # To fetch the first 1 million base pairs only
+    # with Entrez.efetch
+    # (db="nucleotide", 
+    #                id="NC_000001.11", 
+    #                seq_start=2.01*1000000, 
+    #                seq_stop=3*1000000, 
+    #                rettype="gbwithparts", 
+    #                retmode="text") as h:
+        # rec_test = SeqIO.read(h, "genbank")
 
     test_cds_wins, intergenics = [], []
     last_end = 0

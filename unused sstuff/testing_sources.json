@@ -2,26 +2,38 @@
   {
     "name": "Human (Mammal)",
     "id": "NC_000001.11",
-    "start": 19000,
-    "stop": 1700000
+    "start": 2000001,
+    "stop": 3000000
   },
   {
     "name": "Human (Mammal - Chr 17)",
     "id": "NC_000017.11",
-    "start": 1500,
-    "stop": 2000000
+    "start": 40000000,
+    "stop": 42000000
   },
   {
     "name": "Mouse (Mammal - Chr 19)",
     "id": "NC_000085.7",
-    "start": 3900,
-    "stop": 2000000
+    "start": 10000000,
+    "stop": 12000000
   },
   {
     "name": "Arabidopsis (Plant - Chr 1)",
     "id": "NC_003070.9",
     "start": 5000000,
-    "stop": 6000000
+    "stop": 7000000
+  },
+  {
+    "name": "Yeast (Fungi - Chr IV)",
+    "id": "NC_001136.10",
+    "start": 400000,
+    "stop": 900000
+  },
+  {
+    "name": "Worm (Nematode - Chr I)",
+    "id": "NC_003279.8",
+    "start": 5000000,
+    "stop": 7000000
   },
   {
     "name": "Fruit Fly (Insect - Chr 4)",
@@ -62,13 +74,19 @@
   {
     "name": "GUE Species Classification (E. coli K-12)",
     "id": "NC_000913.3",
-    "start": 500000,
-    "stop": 641652
+    "start": 1,
+    "stop": 4641652
   },
   {
     "name": "GUE Fruit Fly Regulatory (Chr 3L)",
     "id": "NT_033779.5",
     "start": 10000000,
     "stop": 12000000
+  },
+  {
+    "name": "GUE C. elegans Histone (Chr II)",
+    "id": "NC_003280.10",
+    "start": 3000000,
+    "stop": 5000000
   }
 ]
