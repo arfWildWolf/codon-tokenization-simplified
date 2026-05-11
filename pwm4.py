@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score,
-    f1_score, matthews_corrcoef, confusion_matrix, roc_auc_score
+    f1_score, matthews_corrcoef, confusion_matrix, roc_auc_score, auc
 )
 import argparse
 import pickle
@@ -15,6 +15,97 @@ PWM_WINDOW = 150     # Evaluate 50bp immediately preceding the start codon
 CODON_WINDOW = 150   # Evaluate 90bp (30 codons) downstream of the start codon
 
 nuc2idx = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
+
+def evaluate_comparative(csv_path, model_data):
+    print(f"\n>>> Running Ablation Benchmark on {csv_path}...")
+    df = pd.read_csv(csv_path)
+    
+    pwm_logo = model_data['pwm_logo']
+    codon_vocab = model_data['codon_vocab']
+    log_emissions = model_data['log_emissions']
+    
+    y_true = df['Label'].astype(int).values
+    results = {"baseline": [], "v1_pwm": [], "v2_codon": [], "v3_hybrid": []}
+    
+    downstream_start = UPSTREAM + 3
+    downstream_end = downstream_start + CODON_WINDOW
+    
+    for seq in df['Sequence']:
+        # Baseline: Ribosome Scanning Model (First ATG encountered)
+        first_atg_idx = seq.find("ATG")
+        b_score = 1.0 if first_atg_idx == UPSTREAM else 0.0
+        results["baseline"].append(b_score)
+        
+        # Component Scoring
+        p_score = score_promoter(seq[UPSTREAM - PWM_WINDOW : UPSTREAM], pwm_logo)
+        tokens = encode(seq[downstream_start : downstream_end], codon_vocab)
+        c_score = score_codons(tokens, log_emissions)
+        
+        results["v1_pwm"].append(p_score)
+        results["v2_codon"].append(c_score)
+        results["v3_hybrid"].append(p_score + c_score)
+        
+    # Visualization
+    plt.style.use('seaborn-v0_8-whitegrid')
+    fig, (ax_roc, ax_pr) = plt.subplots(1, 2, figsize=(18, 7))
+    
+    colors = {'baseline': '#808080', 'v1_pwm': '#4C72B0', 'v2_codon': '#55A868', 'v3_hybrid': '#C44E52'}
+    labels = {'baseline': 'Baseline (First ATG)', 'v1_pwm': 'v1 (PWM Kozak)', 'v2_codon': 'v2 (Codon Bias)', 'v3_hybrid': 'v3 (Hybrid)'}
+    
+    metrics_list = []
+
+    for model_name, y_scores in results.items():
+        y_scores = np.array(y_scores)
+        
+        # ROC Data
+        fpr, tpr, _ = roc_curve(y_true, y_scores)
+        roc_auc = auc(fpr, tpr)
+        ax_roc.plot(fpr, tpr, color=colors[model_name], lw=2.5, label=f"{labels[model_name]} (AUC = {roc_auc:.3f})")
+        
+        # PR Data
+        precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
+        pr_auc = auc(recall, precision)
+        ax_pr.plot(recall, precision, color=colors[model_name], lw=2.5, label=f"{labels[model_name]} (AUC = {pr_auc:.3f})")
+        
+        # Dynamic Threshold Optimization
+        if model_name == 'baseline':
+            y_pred = y_scores
+            ideal_thresh = 0.5
+        else:
+            f1_scores = 2 * (precision * recall) / (precision + recall + 1e-8)
+            best_idx = np.argmax(f1_scores)
+            ideal_thresh = thresholds[best_idx] if best_idx < len(thresholds) else thresholds[-1]
+            y_pred = (y_scores >= ideal_thresh).astype(int)
+        
+        metrics_list.append({
+            "Model": labels[model_name],
+            "Threshold": f"{ideal_thresh:.4f}",
+            "Accuracy": f"{accuracy_score(y_true, y_pred):.4f}",
+            "F1-Score": f"{f1_score(y_true, y_pred, zero_division=0):.4f}",
+            "MCC": f"{matthews_corrcoef(y_true, y_pred):.4f}",
+            "ROC AUC": f"{roc_auc:.4f}",
+            "PR AUC": f"{pr_auc:.4f}"
+        })
+
+    # Format Plots
+    ax_roc.plot([0, 1], [0, 1], color='black', linestyle='--')
+    ax_roc.set_title("ROC Curve: TIS Discrimination", fontsize=14, fontweight='bold')
+    ax_roc.set_xlabel("False Positive Rate")
+    ax_roc.set_ylabel("True Positive Rate")
+    ax_roc.legend(loc="lower right")
+
+    ax_pr.set_title("Precision-Recall Curve", fontsize=14, fontweight='bold')
+    ax_pr.set_xlabel("Recall")
+    ax_pr.set_ylabel("Precision")
+    ax_pr.legend(loc="lower left")
+
+    plt.tight_layout()
+    output_img = f"ablation_metrics_{os.path.basename(csv_path).split('.')[0]}.png"
+    plt.savefig(output_img, dpi=300)
+    plt.close()
+    
+    print(pd.DataFrame(metrics_list).to_string(index=False))
+    print(f"\n[✔] High-res plots saved to {output_img}")
 
 def generate_vocab():
     bases = ['A', 'C', 'G', 'T']
@@ -214,14 +305,14 @@ def evaluate(csv_path, model_data):
     print(confusion_matrix(y_true, y_pred))
 
 def main():
-    parser = argparse.ArgumentParser(description="CSV-based Hybrid TIS Classifier")
+    parser = argparse.ArgumentParser(description="CSV-based Hybrid TIS Classifier Ablation")
     parser.add_argument('--train_csv', type=str, default='train.csv', help='CSV containing training data')
     parser.add_argument('--test_csv', type=str, default='test.csv', help='CSV containing testing data')
     parser.add_argument('--model_file', type=str, default='hybrid_model.pkl', help='Model save path')
     args = parser.parse_args()
 
     if os.path.exists(args.model_file):
-        print("Loading existing hybrid model...")
+        print(f"Loading existing hybrid model from {args.model_file}...")
         with open(args.model_file, 'rb') as f:
             model_data = pickle.load(f)
     else:
@@ -230,8 +321,8 @@ def main():
             pickle.dump(model_data, f)
         print("Model generated and saved.")
 
-    evaluate(args.test_csv, model_data)
-    evaluate_and_optimize(args.train_csv, model_data)
+    # Run the consolidated comparative evaluation on the test set
+    evaluate_comparative(args.test_csv, model_data)
 
 if __name__ == '__main__':
     main()

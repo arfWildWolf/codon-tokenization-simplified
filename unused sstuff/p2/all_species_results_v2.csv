@@ -1,0 +1,7 @@
+ , label, accuracy          , precision         , recall, f1                , specificity        , species
+0, v2   , 0.5965            , 0.5572021339656195,  0.94 , 0.6996650539635281, 0.253              , Human (Mammal - Held-out Region)
+1, v2   , 0.5865            , 0.5512137359384252,  0.931, 0.6924507251766456, 0.242              , Mouse (Mammal - Held-out Region)
+2, v2   , 0.609             , 0.5611672278338945,  1.0  , 0.7189072609633357, 0.218              , Arabidopsis (Plant - Held-out Region)
+3, v2   , 0.5861664712778429, 0.5180887372013652,  1.0  , 0.6825539568345323, 0.25448785638859556, Yeast (Fungi - Unseen Clade)
+4, v2   , 0.665             , 0.5988023952095808,  1.0  , 0.7490636704119851, 0.33               , Worm (Nematode - Unseen Clade)
+5, v2   , 0.664             , 0.5980861244019139,  1.0  , 0.7485029940119761, 0.328              , GUE C. elegans Histone (Nematode)

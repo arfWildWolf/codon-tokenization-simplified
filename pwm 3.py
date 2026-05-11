@@ -229,6 +229,16 @@ def decoder_v3(seq_str, tokens, pwm_threshold=-5.0, cub_weight=2.0):
     for i in range(best_start+1, len(tokens)): path[i] = 2
     return path
 
+def decoder_baseline(seq_str, tokens):
+    """Baseline: Plain codon tokenization - predicts first ATG as TIS."""
+    path = [0] * len(tokens)
+    for t, tok in enumerate(tokens):
+        if tok == codon_vocab["ATG"]:
+            path[t] = 1
+            for i in range(t+1, len(tokens)): path[i] = 2
+            return path
+    return path
+
 # ─────────────────────────────────────────────
 # PIPELINE & EVALUATION
 # ─────────────────────────────────────────────
@@ -282,11 +292,12 @@ def evaluate(decoder_fn, label, test_data):
         
         if 1 in preds:
             p_s = preds.index(1)
-            # Match score logic to v3 structure for accurate ROCs
             if label == "v3":
                 p_score = score_promoter(seq[p_s*3-50 : p_s*3])
                 cub = score_coding_potential(seq[p_s*3+3 : p_s*3+93], codon_log_odds_map)
                 final_score = p_score + (cub * 2.0)
+            elif label == "baseline":
+                final_score = 1.0 # Binary prediction, no statistical confidence
             else:
                 final_score = score_promoter(seq[p_s*3-50 : p_s*3])
         else:
@@ -326,19 +337,19 @@ def evaluate(decoder_fn, label, test_data):
                 f1=f1, mcc=mcc, mae=mae, exact_rate=exact_rate,
                 specificity=specificity, balanced_accuracy=bal_acc,
                 y_true=all_t, y_pred=all_p, y_scores=all_scores)
-
+    
 # ─────────────────────────────────────────────
 # DIAGNOSTICS & PLOTTING
 # ─────────────────────────────────────────────
 def generate_aggregate_diagnostics_v3(tprs_dict, aucs_dict, mean_fpr, cms_dict):
     plt.style.use('seaborn-v0_8-whitegrid')
-    fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+    fig, axes = plt.subplots(2, 4, figsize=(24, 10)) # Expanded to 4 columns
     fig.suptitle("Cross-Eukaryotic TIS Prediction: Evolving to Codon-Level Resolution", 
                  fontsize=20, fontweight='bold', y=0.98)
 
-    versions = ["v1", "v2", "v3"]
-    colors = ['#4C72B0', '#55A868', '#C44E52']
-    cm_cmaps = ['Blues', 'Greens', 'Reds']
+    versions = ["baseline", "v1", "v2", "v3"]
+    colors = ['#808080', '#4C72B0', '#55A868', '#C44E52']
+    cm_cmaps = ['Greys', 'Blues', 'Greens', 'Reds']
 
     for i, ver in enumerate(versions):
         ax_roc = axes[0, i]
@@ -364,9 +375,9 @@ def generate_aggregate_diagnostics_v3(tprs_dict, aucs_dict, mean_fpr, cms_dict):
         ax_cm.set_ylabel("True")
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig("v3_performance_comparison.png", dpi=300)
+    plt.savefig("performance_comparison_full.png", dpi=300)
     plt.close()
-    print("[✔] Saved -> v3_performance_comparison.png")
+    print("[✔] Saved -> performance_comparison_full.png")
 
 def plot_resolution_sharpness():
     """Generates the IEEE Proof graph using a synthetic ideal sequence."""
@@ -423,12 +434,13 @@ def testingFromjson(filepath="testing_sources.json"):
     testing_sources = load_training_sources(filepath)
     if not testing_sources: return
 
-    all_metrics_v1, all_metrics_v2, all_metrics_v3 = [], [], []
+    all_metrics_baseline, all_metrics_v1, all_metrics_v2, all_metrics_v3 = [], [], [], []
     mean_fpr = np.linspace(0, 1, 100)
     
-    tprs = {"v1": [], "v2": [], "v3": []}
-    aucs = {"v1": [], "v2": [], "v3": []}
-    cms  = {"v1": np.zeros((2, 2), dtype=int), 
+    tprs = {"baseline": [], "v1": [], "v2": [], "v3": []}
+    aucs = {"baseline": [], "v1": [], "v2": [], "v3": []}
+    cms  = {"baseline": np.zeros((2, 2), dtype=int),
+            "v1": np.zeros((2, 2), dtype=int), 
             "v2": np.zeros((2, 2), dtype=int), 
             "v3": np.zeros((2, 2), dtype=int)}
 
@@ -451,12 +463,13 @@ def testingFromjson(filepath="testing_sources.json"):
         if not test_data: continue
 
         results = {
+            "baseline": evaluate(decoder_baseline, "baseline", test_data),
             "v1": evaluate(decoder_v1, "v1", test_data),
             "v2": evaluate(decoder_v2, "v2", test_data),
             "v3": evaluate(decoder_v3, "v3", test_data)
         }
 
-        for ver in ["v1", "v2", "v3"]:
+        for ver in ["baseline", "v1", "v2", "v3"]:
             res = results[ver]
             fpr, tpr, _ = roc_curve(res["y_true"], res["y_scores"])
             interp_tpr = np.interp(mean_fpr, fpr, tpr)
@@ -467,14 +480,17 @@ def testingFromjson(filepath="testing_sources.json"):
 
             clean_res = {k: v for k, v in res.items() if k not in ['y_true', 'y_pred', 'y_scores']}
             clean_res['species'] = species_name
-            if ver == "v1": all_metrics_v1.append(clean_res)
+            
+            if ver == "baseline": all_metrics_baseline.append(clean_res)
+            elif ver == "v1": all_metrics_v1.append(clean_res)
             elif ver == "v2": all_metrics_v2.append(clean_res)
             else: all_metrics_v3.append(clean_res)
 
+    pd.DataFrame(all_metrics_baseline).to_csv("all_species_results_baseline.csv", index=False)
     pd.DataFrame(all_metrics_v1).to_csv("all_species_results_v1.csv", index=False)
     pd.DataFrame(all_metrics_v2).to_csv("all_species_results_v2.csv", index=False)
     pd.DataFrame(all_metrics_v3).to_csv("all_species_results_v3.csv", index=False)
-    print("\n[✔] Metrics saved for v1, v2, and v3.")
+    print("\n[✔] Metrics saved for baseline, v1, v2, and v3.")
 
     generate_aggregate_diagnostics_v3(tprs, aucs, mean_fpr, cms)
 
