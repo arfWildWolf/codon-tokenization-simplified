@@ -171,6 +171,33 @@ def train_model():
 # ─────────────────────────────────────────────
 # DECODERS (v1, v2, v3)
 # ─────────────────────────────────────────────
+
+def decoder_stride1_naive(seq_str, tokens):
+    """
+    Naive Stride-1 Baseline: Scans the raw string char-by-char.
+    Detects EVERY ATG regardless of frame and picks the best PWM score.
+    """
+    best_idx, best_score = -1, -np.inf
+    
+    # Scan char-by-char (Stride 1) - simulates no tokenization
+    for i in range(len(seq_str) - 2):
+        if seq_str[i:i+3] == "ATG":
+            upstream = seq_str[i-50:i]
+            if len(upstream) == 50:
+                p_score = score_promoter(upstream)
+                if p_score > best_score:
+                    best_score = p_score
+                    best_idx = i
+                    
+    path = [0] * len(tokens)
+    if best_idx != -1:
+        # Map char index back to token index for compatibility with eval pipeline
+        tok_idx = best_idx // 3
+        if tok_idx < len(path):
+            path[tok_idx] = 1
+            for i in range(tok_idx + 1, len(tokens)): path[i] = 2
+    return path
+
 def decoder_v1(seq_str, tokens):
     best_start, best_score = -1, -np.inf
     for t, tok in enumerate(tokens):
@@ -343,27 +370,40 @@ def evaluate(decoder_fn, label, test_data):
 # ─────────────────────────────────────────────
 def generate_aggregate_diagnostics_v3(tprs_dict, aucs_dict, mean_fpr, cms_dict):
     plt.style.use('seaborn-v0_8-whitegrid')
-    fig, axes = plt.subplots(2, 4, figsize=(24, 10)) # Expanded to 4 columns
-    fig.suptitle("Cross-Eukaryotic TIS Prediction: Evolving to Codon-Level Resolution", 
-                 fontsize=20, fontweight='bold', y=0.98)
+    # Use 5 columns for: naive, baseline, v1, v2, v3
+    fig, axes = plt.subplots(2, 5, figsize=(30, 10)) 
+    fig.suptitle("Cross-Eukaryotic TIS Prediction: Stride-1 Scanning vs. Codon Tokenization", 
+                 fontsize=22, fontweight='bold', y=0.98)
 
-    versions = ["baseline", "v1", "v2", "v3"]
-    colors = ['#808080', '#4C72B0', '#55A868', '#C44E52']
-    cm_cmaps = ['Greys', 'Blues', 'Greens', 'Reds']
+    versions = ["naive", "baseline", "v1", "v2", "v3"]
+    colors = ['#000000', '#808080', '#4C72B0', '#55A868', '#C44E52']
+    cm_cmaps = ['Greys', 'Purples', 'Blues', 'Greens', 'Reds']
 
     for i, ver in enumerate(versions):
         ax_roc = axes[0, i]
         ax_cm = axes[1, i]
         
-        current_tprs = tprs_dict[ver]
-        mean_tpr = np.mean(current_tprs, axis=0)
-        mean_tpr[-1] = 1.0
-        mean_auc = auc(mean_fpr, mean_tpr)
-        std_tpr = np.std(current_tprs, axis=0)
+        current_tprs = tprs_dict.get(ver, [])
+        
+        # Check if we actually have data for this version
+        if not current_tprs or len(current_tprs) == 0:
+            ax_roc.set_title(f"{ver.upper()} (No Data)")
+            ax_cm.set_title(f"{ver.upper()} (No Data)")
+            continue
 
-        ax_roc.plot(mean_fpr, mean_tpr, color=colors[i], lw=3, label=f'Mean (AUC={mean_auc:.3f})')
-        ax_roc.fill_between(mean_fpr, np.maximum(mean_tpr - std_tpr, 0), 
-                            np.minimum(mean_tpr + std_tpr, 1), color=colors[i], alpha=0.2)
+        # Ensure we are taking the mean across the correct axis
+        mean_tpr = np.mean(current_tprs, axis=0)
+        
+        # Fix for the TypeError: Verify mean_tpr is an array before indexing
+        if isinstance(mean_tpr, np.ndarray) and mean_tpr.ndim > 0:
+            mean_tpr[-1] = 1.0
+            mean_auc = auc(mean_fpr, mean_tpr)
+            std_tpr = np.std(current_tprs, axis=0)
+
+            ax_roc.plot(mean_fpr, mean_tpr, color=colors[i], lw=3, label=f'Mean (AUC={mean_auc:.3f})')
+            ax_roc.fill_between(mean_fpr, np.maximum(mean_tpr - std_tpr, 0), 
+                                np.minimum(mean_tpr + std_tpr, 1), color=colors[i], alpha=0.2)
+        
         ax_roc.plot([0, 1], [0, 1], color='gray', linestyle='--')
         ax_roc.set_title(f"{ver.upper()} ROC Curve", fontsize=14, fontweight='bold')
         ax_roc.legend(loc="lower right")
@@ -375,9 +415,9 @@ def generate_aggregate_diagnostics_v3(tprs_dict, aucs_dict, mean_fpr, cms_dict):
         ax_cm.set_ylabel("True")
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig("performance_comparison_full.png", dpi=300)
+    plt.savefig("v3_comprehensive_comparison.png", dpi=300)
     plt.close()
-    print("[✔] Saved -> performance_comparison_full.png")
+    print("[✔] Saved -> v3_comprehensive_comparison.png")
 
 def plot_resolution_sharpness():
     """Generates the IEEE Proof graph using a synthetic ideal sequence."""
@@ -434,15 +474,14 @@ def testingFromjson(filepath="testing_sources.json"):
     testing_sources = load_training_sources(filepath)
     if not testing_sources: return
 
-    all_metrics_baseline, all_metrics_v1, all_metrics_v2, all_metrics_v3 = [], [], [], []
-    mean_fpr = np.linspace(0, 1, 100)
+    # Initialize dictionaries for all 5 versions
+    versions = ["naive", "baseline", "v1", "v2", "v3"]
+    all_metrics = {v: [] for v in versions}
+    tprs = {v: [] for v in versions}
+    aucs = {v: [] for v in versions}
+    cms = {v: np.zeros((2, 2), dtype=int) for v in versions}
     
-    tprs = {"baseline": [], "v1": [], "v2": [], "v3": []}
-    aucs = {"baseline": [], "v1": [], "v2": [], "v3": []}
-    cms  = {"baseline": np.zeros((2, 2), dtype=int),
-            "v1": np.zeros((2, 2), dtype=int), 
-            "v2": np.zeros((2, 2), dtype=int), 
-            "v3": np.zeros((2, 2), dtype=int)}
+    mean_fpr = np.linspace(0, 1, 100)
 
     for source in testing_sources:
         species_name = source['name']
@@ -457,47 +496,49 @@ def testingFromjson(filepath="testing_sources.json"):
                 rec_test = SeqIO.read(handle, "genbank")
         except Exception as e:
             print(f"      [!] Fetch Failed: {e}")
-            continue
+            continue # Skip to the next species if network times out
 
         test_data = prepare_test_data(rec_test)
         if not test_data: continue
 
+        # Generate results for all decoders
         results = {
+            "naive": evaluate(decoder_stride1_naive, "naive", test_data),
             "baseline": evaluate(decoder_baseline, "baseline", test_data),
             "v1": evaluate(decoder_v1, "v1", test_data),
             "v2": evaluate(decoder_v2, "v2", test_data),
             "v3": evaluate(decoder_v3, "v3", test_data)
         }
 
-        for ver in ["baseline", "v1", "v2", "v3"]:
+        # Store results for each version
+        for ver in versions:
             res = results[ver]
             fpr, tpr, _ = roc_curve(res["y_true"], res["y_scores"])
             interp_tpr = np.interp(mean_fpr, fpr, tpr)
             interp_tpr[0] = 0.0
+            
             tprs[ver].append(interp_tpr)
             aucs[ver].append(auc(fpr, tpr))
             cms[ver] += confusion_matrix(res["y_true"], res["y_pred"], labels=[0, 1])
-
+            
+            # Save metrics to list for CSV export
             clean_res = {k: v for k, v in res.items() if k not in ['y_true', 'y_pred', 'y_scores']}
             clean_res['species'] = species_name
-            
-            if ver == "baseline": all_metrics_baseline.append(clean_res)
-            elif ver == "v1": all_metrics_v1.append(clean_res)
-            elif ver == "v2": all_metrics_v2.append(clean_res)
-            else: all_metrics_v3.append(clean_res)
+            all_metrics[ver].append(clean_res)
 
-    pd.DataFrame(all_metrics_baseline).to_csv("all_species_results_baseline.csv", index=False)
-    pd.DataFrame(all_metrics_v1).to_csv("all_species_results_v1.csv", index=False)
-    pd.DataFrame(all_metrics_v2).to_csv("all_species_results_v2.csv", index=False)
-    pd.DataFrame(all_metrics_v3).to_csv("all_species_results_v3.csv", index=False)
-    print("\n[✔] Metrics saved for baseline, v1, v2, and v3.")
-
+    # Export all 5 CSVs
+    for ver in versions:
+        if all_metrics[ver]:
+            pd.DataFrame(all_metrics[ver]).to_csv(f"all_species_results_{ver}.csv", index=False)
+    
+    print("\n[✔] All metrics saved to CSV.")
     generate_aggregate_diagnostics_v3(tprs, aucs, mean_fpr, cms)
-
+    
 # ─────────────────────────────────────────────
 # MAIN EXECUTION
 # ─────────────────────────────────────────────
 def main():
+    print("test")
     parser = argparse.ArgumentParser(description="Biological Gatekeeper v3 Benchmark")
     parser.add_argument('--model_file', type=str, default='model.pkl', help='Path to model file')
     parser.add_argument('--test_json', type=str, default='testing_sources.json', help='Testing targets')
