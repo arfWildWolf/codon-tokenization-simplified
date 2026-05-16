@@ -340,13 +340,14 @@ def evaluate(decoder_fn, label, test_data):
         if 1 in lbls:
             total_cds += 1
             t_s = lbls.index(1)
-            true_starts.append(t_s * 3)
+            
+            # Move the true_starts append inside this condition
             if 1 in preds:
                 p_s = preds.index(1)
-                pred_starts.append(p_s * 3)
-                if p_s == t_s: exact_hits += 1
-            else:
-                pred_starts.append(len(seq))
+                true_starts.append(t_s * 3)  # Tracks ONLY when a prediction exists
+                pred_starts.append(p_s * 3)  # Tracks ONLY when a prediction exists
+                if p_s == t_s: 
+                    exact_hits += 1
 
     acc  = accuracy_score(all_t, all_p)
     prec = precision_score(all_t, all_p, zero_division=0)

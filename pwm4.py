@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score,
     f1_score, matthews_corrcoef, confusion_matrix, roc_auc_score, auc,
-    precision_recall_curve, roc_curve
+    precision_recall_curve, roc_curve, balanced_accuracy_score
 )
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -148,28 +148,39 @@ def evaluate_comparative(csv_path, model_data):
         ax_roc.plot(fpr, tpr, color=colors[model_name], lw=2.5, label=f"{labels[model_name]} (AUC = {roc_auc:.3f})")
         
         # PR Data
-        precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
-        pr_auc = auc(recall, precision)
-        ax_pr.plot(recall, precision, color=colors[model_name], lw=2.5, label=f"{labels[model_name]} (AUC = {pr_auc:.3f})")
+        precision_vals, recall_vals, thresholds = precision_recall_curve(y_true, y_scores)
+        pr_auc = auc(recall_vals, precision_vals)
+        ax_pr.plot(recall_vals, precision_vals, color=colors[model_name], lw=2.5, label=f"{labels[model_name]} (AUC = {pr_auc:.3f})")
         
         # Dynamic Threshold Optimization
         if model_name == 'baseline':
             y_pred = y_scores
             ideal_thresh = 0.5
         else:
-            f1_scores = 2 * (precision * recall) / (precision + recall + 1e-8)
+            # Avoid division by zero warnings
+            f1_scores = 2 * (precision_vals * recall_vals) / (precision_vals + recall_vals + 1e-8)
             best_idx = np.argmax(f1_scores)
             ideal_thresh = thresholds[best_idx] if best_idx < len(thresholds) else thresholds[-1]
             y_pred = (y_scores >= ideal_thresh).astype(int)
         
+        # Calculate matrix-dependent metrics
+        tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=[0, 1]).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+        
         metrics_list.append({
             "Model": labels[model_name],
-            "Threshold": f"{ideal_thresh:.4f}",
-            "Accuracy": f"{accuracy_score(y_true, y_pred):.4f}",
-            "F1-Score": f"{f1_score(y_true, y_pred, zero_division=0):.4f}",
-            "MCC": f"{matthews_corrcoef(y_true, y_pred):.4f}",
-            "ROC AUC": f"{roc_auc:.4f}",
-            "PR AUC": f"{pr_auc:.4f}"
+            "Threshold": round(ideal_thresh, 4),
+            "Accuracy": round(accuracy_score(y_true, y_pred), 4),
+            "Precision": round(precision_score(y_true, y_pred, zero_division=0), 4),
+            "Recall": round(recall_score(y_true, y_pred, zero_division=0), 4),
+            "F1-Score": round(f1_score(y_true, y_pred, zero_division=0), 4),
+            "MCC": round(matthews_corrcoef(y_true, y_pred), 4),
+            "Specificity": round(specificity, 4),
+            "Balanced Accuracy": round(balanced_accuracy_score(y_true, y_pred), 4),
+            "ROC AUC": round(roc_auc, 4),
+            "PR AUC": round(pr_auc, 4),
+            "Exact Rate %": "N/A", # Impossible for fixed-window binary classification
+            "MAE": "N/A"           # Impossible for fixed-window binary classification
         })
 
     # Format Plots
@@ -185,12 +196,19 @@ def evaluate_comparative(csv_path, model_data):
     ax_pr.legend(loc="lower left")
 
     plt.tight_layout(rect=[0, 0, 1, 0.93])
-    output_img = f"ablation_metrics_{os.path.basename(csv_path).split('.')[0]}.png"
+    base_name = os.path.basename(csv_path).split('.')[0]
+    output_img = f"ablation_metrics_{base_name}.png"
     plt.savefig(output_img, dpi=300)
     plt.close()
     
-    print(pd.DataFrame(metrics_list).to_string(index=False))
+    # Generate CSV Output
+    output_csv = f"ablation_results_{base_name}.csv"
+    metrics_df = pd.DataFrame(metrics_list)
+    metrics_df.to_csv(output_csv, index=False)
+    
+    print(metrics_df.to_string(index=False))
     print(f"\n[✔] High-res comparative plot saved to {output_img}")
+    print(f"[✔] Benchmark metrics successfully exported to {output_csv}")
 
 # ─────────────────────────────────────────────
 # MAIN EXECUTION
