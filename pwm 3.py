@@ -372,7 +372,7 @@ def evaluate(decoder_fn, label, test_data):
 def generate_aggregate_diagnostics_v3(tprs_dict, aucs_dict, mean_fpr, cms_dict):
     plt.style.use('seaborn-v0_8-whitegrid')
     # Use 5 columns for: naive, baseline, v1, v2, v3
-    fig, axes = plt.subplots(2, 5, figsize=(30, 10)) 
+    fig, axes = plt.subplots(5, 2, figsize=(15, 25))
     fig.suptitle("Cross-Eukaryotic TIS Prediction: Stride-1 Scanning vs. Codon Tokenization", 
                  fontsize=22, fontweight='bold', y=0.98)
 
@@ -381,8 +381,8 @@ def generate_aggregate_diagnostics_v3(tprs_dict, aucs_dict, mean_fpr, cms_dict):
     cm_cmaps = ['Greys', 'Purples', 'Blues', 'Greens', 'Reds']
 
     for i, ver in enumerate(versions):
-        ax_roc = axes[0, i]
-        ax_cm = axes[1, i]
+        ax_roc = axes[i, 0]
+        ax_cm = axes[i, 1]
         
         current_tprs = tprs_dict.get(ver, [])
         
@@ -410,7 +410,8 @@ def generate_aggregate_diagnostics_v3(tprs_dict, aucs_dict, mean_fpr, cms_dict):
         ax_roc.legend(loc="lower right")
 
         sns.heatmap(cms_dict[ver], annot=True, fmt='d', cmap=cm_cmaps[i], ax=ax_cm, cbar=False,
-                    xticklabels=['Intergenic', 'CDS'], yticklabels=['Intergenic', 'CDS'])
+                    xticklabels=['Intergenic', 'CDS'], yticklabels=['Intergenic', 'CDS'],
+                    annot_kws={"size": 18})  # Adjust 18 to your preferred font size
         ax_cm.set_title(f"{ver.upper()} Confusion Matrix", fontsize=14, fontweight='bold')
         ax_cm.set_xlabel("Predicted")
         ax_cm.set_ylabel("True")

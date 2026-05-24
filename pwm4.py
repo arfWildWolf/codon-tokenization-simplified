@@ -19,7 +19,8 @@ warnings.filterwarnings('ignore')
 # ─────────────────────────────────────────────
 UPSTREAM = 150
 DOWNSTREAM = 150
-PWM_WINDOW = 150     # Evaluate 50bp immediately preceding the start codon
+PWM_WINDOW = 150     # Upstream context length
+PWM_LENGTH = PWM_WINDOW + 3 # Upstream + Start Codon
 CODON_WINDOW = 150   # Evaluate 90bp (30 codons) downstream of the start codon
 nuc2idx = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
 
@@ -38,7 +39,8 @@ def encode(seq_str, codon_vocab):
             for i in range(0, len(seq_str)-2, 3)]
 
 def score_promoter(window, pwm_logo):
-    if len(window) != PWM_WINDOW:
+    # Match against the new expanded PWM length
+    if len(window) != PWM_LENGTH:
         return -999.0
     return sum(pwm_logo[nuc2idx.get(c, 0), i] for i, c in enumerate(window))
 
@@ -55,10 +57,11 @@ def train_model(csv_path):
     train_true = df[df['Label'] == True]['Sequence'].tolist()
     train_false = df[df['Label'] == False]['Sequence'].tolist()
     
-    # 1. Train Upstream PWM
-    pwm_counts = np.ones((4, PWM_WINDOW)) * 1e-4
+    # 1. Train Upstream PWM (Now includes the ATG)
+    pwm_counts = np.ones((4, PWM_LENGTH)) * 1e-4
     for seq in train_true:
-        upstream_chunk = seq[UPSTREAM - PWM_WINDOW : UPSTREAM]
+        # Include UPSTREAM + 3 to capture the start codon
+        upstream_chunk = seq[UPSTREAM - PWM_WINDOW : UPSTREAM + 3]
         for i, nuc in enumerate(upstream_chunk):
             if nuc in nuc2idx:
                 pwm_counts[nuc2idx[nuc], i] += 1
@@ -118,8 +121,8 @@ def evaluate_comparative(csv_path, model_data):
         b_score = 1.0 if first_atg_idx == UPSTREAM else 0.0
         results["baseline"].append(b_score)
         
-        # Component Scoring
-        p_score = score_promoter(seq[UPSTREAM - PWM_WINDOW : UPSTREAM], pwm_logo)
+        # Component Scoring (Expanded window to include ATG)
+        p_score = score_promoter(seq[UPSTREAM - PWM_WINDOW : UPSTREAM + 3], pwm_logo)
         tokens = encode(seq[downstream_start : downstream_end], codon_vocab)
         c_score = score_codons(tokens, log_emissions)
         
@@ -134,7 +137,7 @@ def evaluate_comparative(csv_path, model_data):
                  fontsize=18, fontweight='bold', y=0.98)
     
     colors = {'baseline': '#000000', 'v1_pwm': '#4C72B0', 'v2_codon': '#55A868', 'v3_hybrid': '#C44E52'}
-    labels = {'baseline': 'Naive Scanning (First ATG)', 'v1_pwm': 'v1 (PWM Kozak Only)', 
+    labels = {'baseline': 'Naive Scanning (First ATG)', 'v1_pwm': 'v1 (PWM Kozak + ATG)', 
               'v2_codon': 'v2 (Codon Bias Only)', 'v3_hybrid': 'v3 (Hybrid Model)'}
     
     metrics_list = []
@@ -179,8 +182,8 @@ def evaluate_comparative(csv_path, model_data):
             "Balanced Accuracy": round(balanced_accuracy_score(y_true, y_pred), 4),
             "ROC AUC": round(roc_auc, 4),
             "PR AUC": round(pr_auc, 4),
-            "Exact Rate %": "N/A", # Impossible for fixed-window binary classification
-            "MAE": "N/A"           # Impossible for fixed-window binary classification
+            "Exact Rate %": "N/A", 
+            "MAE": "N/A"           
         })
 
     # Format Plots
